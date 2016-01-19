@@ -27,11 +27,6 @@
 #include "WorkerManager.h"
 #include "WorkerSession.h"
 
-#ifdef INFINIBAND
-#include "InfRcTransport.h"
-#include "InfUdDriver.h"
-#endif
-
 #ifdef ONLOAD
 #include "SolarFlareDriver.h"
 #endif
@@ -94,47 +89,7 @@ static struct FastSolarFlareTransportFactory : public TransportFactory {
 } fastSolarFlareTransportFactory;
 #endif
 
-#ifdef INFINIBAND
-static struct BasicInfUdTransportFactory : public TransportFactory {
-    BasicInfUdTransportFactory()
-        : TransportFactory("basic+infinibandud", "basic+infud") {}
-    Transport* createTransport(Context* context,
-            const ServiceLocator* localServiceLocator) {
-        return new BasicTransport(context, localServiceLocator,
-                new InfUdDriver(context, localServiceLocator, false),
-                generateRandom());
-    }
-} basicInfUdTransportFactory;
 
-static struct FastInfUdTransportFactory : public TransportFactory {
-    FastInfUdTransportFactory()
-        : TransportFactory("fast+infinibandud", "fast+infud") {}
-    Transport* createTransport(Context* context,
-            const ServiceLocator* localServiceLocator) {
-        return new FastTransport(context,
-                new InfUdDriver(context, localServiceLocator, false));
-    }
-} fastInfUdTransportFactory;
-
-static struct FastInfEthTransportFactory : public TransportFactory {
-    FastInfEthTransportFactory()
-        : TransportFactory("fast+infinibandethernet", "fast+infeth") {}
-    Transport* createTransport(Context* context,
-            const ServiceLocator* localServiceLocator) {
-        return new FastTransport(context,
-                new InfUdDriver(context, localServiceLocator, true));
-    }
-} fastInfEthTransportFactory;
-
-static struct InfRcTransportFactory : public TransportFactory {
-    InfRcTransportFactory()
-        : TransportFactory("infinibandrc", "infrc") {}
-    Transport* createTransport(Context* context,
-            const ServiceLocator* localServiceLocator) {
-        return new InfRcTransport(context, localServiceLocator);
-    }
-} infRcTransportFactory;
-#endif
 
 #ifdef DPDK
 static struct BasicDpdkTransportFactory : public TransportFactory {
@@ -180,12 +135,7 @@ TransportManager::TransportManager(Context* context)
     transportFactories.push_back(&basicSolarFlareTransportFactory);
     transportFactories.push_back(&fastSolarFlareTransportFactory);
 #endif
-#ifdef INFINIBAND
-    transportFactories.push_back(&basicInfUdTransportFactory);
-    transportFactories.push_back(&fastInfUdTransportFactory);
-    transportFactories.push_back(&fastInfEthTransportFactory);
-    transportFactories.push_back(&infRcTransportFactory);
-#endif
+
 #ifdef DPDK
     transportFactories.push_back(&basicDpdkTransportFactory);
     transportFactories.push_back(&fastDpdkTransportFactory);
